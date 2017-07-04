@@ -39,19 +39,19 @@ public class DocumentRepository {
                     System.out.print("  ");
                 }
                 System.out.println("- Project: " + dir.getName() + " - URL: " + dir.getAbsolutePath().substring(rootLength));
-                List<String> ts = null;
+                List<String> sortedList = null;
                 String s[] = dir.list();
-                //ts = sort(s);
-                ts = sortExtension(s);
-                for (String item : ts) {
+                //sortedList = sort(s);
+                sortedList = sortExtension(s);
+                for (String item : sortedList) {
                     tabs++;
                     File f = new File(dir + "/" + item);
                     if (f.isDirectory()) {
                         listAllFilesAndDirectories(f, tabs);
                         tabs--;
                     } else {
-                        File f2 = new File(dir + "/" + item);
-                        displayFile(f2, tabs);
+                        File file = new File(dir + "/" + item);
+                        displayFile(file, tabs);
                         tabs--;
                     }
                 }
@@ -70,8 +70,8 @@ public class DocumentRepository {
      * @param tabs Number of tabs to be applied before printing
      */
     public void displayFile(File file, int tabs) {
-        String sb = file.getName();
-        String[] split = sb.split("\\.");
+        String s = file.getName();
+        String[] split = s.split("\\.");
         for (int i = 0; i < tabs; i++) {
             System.out.print("  ");
         }
@@ -85,29 +85,38 @@ public class DocumentRepository {
      * @return List of Strings
      */
     public List<String> sortExtension(String[] s) {
-        List<String> lst2 = new CopyOnWriteArrayList<>(Arrays.asList(s));
-        Set<String> ts = new TreeSet<>();
+        List<String> orgList = new CopyOnWriteArrayList<>(Arrays.asList(s));
+        Set<String> uniqueExtension = new TreeSet<>();
+
         for (String item : s) {
             if (item.contains(".")) {
                 String[] split = item.split("\\.");
                 String temp = "." + split[split.length - 1];
-                ts.add(temp);
+                uniqueExtension.add(temp);
             }
         }
-        List<String> lst = new LinkedList<>();
-        ts.stream().forEach((s1) -> {
-            for (int i = 0; i < lst2.size(); i++) {
-                if (lst2.get(i).contains(s1)) {
-                    lst.add(lst2.get(i));
-                    lst2.remove(lst2.get(i));
+
+        List<String> finalListOfAllFiles = new LinkedList<>();
+        uniqueExtension.stream().forEach((s1) -> {
+            for (int i = 0; i < orgList.size(); i++) {
+                if (orgList.get(i).contains(s1)) {
+                    finalListOfAllFiles.add(orgList.get(i));
+                    orgList.remove(orgList.get(i));
                     i--;
                 }
             }
         });
-        lst2.stream().filter((s1) -> (!lst.contains(s1))).forEach((s1) -> {
-            lst.add(s1);
+        
+        orgList.stream().filter((s1) -> (!finalListOfAllFiles.contains(s1))).forEach((s1) -> {
+            finalListOfAllFiles.add(s1);
         });
-        return lst;
+
+//        for (String s1 : orgList) {
+//            if (!finalListOfAllFiles.contains(s1)) {
+//                finalListOfAllFiles.add(s1);
+//            }
+//        }
+        return finalListOfAllFiles;
     }
 
 //      public List<String> sort(String[] s) {
@@ -115,6 +124,7 @@ public class DocumentRepository {
 //        Collections.sort(copyOnWriteList, (String o1, String o2) -> o1.compareTo(o2));
 //        return copyOnWriteList;
 //    }
+    
     /**
      * @param args the command line arguments
      */
